@@ -6,6 +6,7 @@ import User from "../../models/user";
 import generateAccessToken from "../../auth/generateAccessToken";
 import generateRefreshToken from "../../auth/generateRefreshToken";
 import serverResponse from "../../utils/serverResponse";
+import parseUser from "../../utils/parseUser";
 
 export default async function login(req: Request, res: Response) {
     if ((req as any).user) res.status(200).send(serverResponse(200, "OK", { user: (req as any).user }));
@@ -29,13 +30,5 @@ export default async function login(req: Request, res: Response) {
     user.refreshTokens = [...(user as any).refreshTokens, { tokenJti: refreshToken.payloadHash }];
     await user.save();
 
-    res.status(200).send(serverResponse(200, "OK", {
-        user: {
-            id: user._id,
-            username: user.username,
-            email: user.email,
-            creationDate: user.creationDate,
-            lastUpdated: user.lastUpdated,
-        }
-    }));
+    res.status(200).send(serverResponse(200, "OK", parseUser(user)));
 }
